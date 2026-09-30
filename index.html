@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activiti BPMN 在线设计器</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="toolbar">
+        <div class="toolbar-brand">Activiti BPMN 设计器</div>
+        <div class="toolbar-actions">
+          <button type="button" id="btn-open" title="打开本地 BPMN / XML 文件">打开</button>
+          <button type="button" id="btn-download" title="下载当前流程图为 BPMN XML">下载</button>
+          <button type="button" id="btn-new" title="新建空白流程">新建</button>
+          <button type="button" id="btn-fit" title="适应画布">适应画布</button>
+          <input type="file" id="file-input" accept=".bpmn,.xml,application/xml,text/xml" hidden />
+        </div>
+        <div class="toolbar-status" id="status">就绪</div>
+      </header>
+      <main class="workspace">
+        <div id="canvas"></div>
+        <aside id="properties"></aside>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
