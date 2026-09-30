@@ -1,0 +1,45 @@
+:root {
+  --bi-green: #10ad73;
+  --bi-green-dark: #0c8d5e;
+  --bi-gray: #404040;
+  --bi-muted: #6b6b6b;
+  --bi-line: #e6e6e6;
+  --bi-font: "IBM Plex Sans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --bi-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lang-switch button {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.lang-switch button + button {
+  border-left: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.lang-switch button[aria-pressed='true'] {
+  background: #fff;
+  color: var(--bi-green-dark);
+}
+
+.lang-switch button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}

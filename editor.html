@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BPMN Editor</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script src="/locale-boot.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <header class="toolbar">
+        <a class="toolbar-brand" href="index.html" data-i18n-aria="editorHome">bpmn editor</a>
+        <div class="toolbar-actions">
+          <button type="button" id="btn-open" data-i18n="open" data-i18n-title="openTitle"></button>
+          <button type="button" id="btn-download" data-i18n="download" data-i18n-title="downloadTitle"></button>
+          <button type="button" id="btn-new" data-i18n="newDiagram" data-i18n-title="newTitle"></button>
+          <button type="button" id="btn-fit" data-i18n="fit" data-i18n-title="fitTitle"></button>
+          <input type="file" id="file-input" accept=".bpmn,.xml,application/xml,text/xml" hidden />
+        </div>
+        <div class="lang-switch" role="group">
+          <button type="button" data-set-locale="en">EN</button>
+          <button type="button" data-set-locale="zh">中文</button>
+        </div>
+        <div class="toolbar-status" id="status" data-i18n="ready"></div>
+      </header>
+      <main class="workspace">
+        <div id="canvas"></div>
+        <aside id="properties"></aside>
+      </main>
+    </div>
+    <script type="module" src="/src/editor.ts"></script>
+  </body>
+</html>
