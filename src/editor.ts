@@ -3,8 +3,13 @@ import {
   BpmnPropertiesPanelModule,
   BpmnPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
-import activitiModdleDescriptor from 'activiti-bpmn-moddle/resources/activiti.json';
-import { ActivitiPropertiesProviderModule } from './provider';
+import {
+  adaptActivitiXml,
+  emptyDiagramXml,
+  engineFromParam,
+  moddleDescriptorFor
+} from './engines';
+import { createEnginePropertiesModule } from './provider';
 import {
   applyDocumentLocale,
   bindLocaleSwitch,
@@ -24,29 +29,10 @@ type ZoomCanvas = {
   zoom: (type: string, auto?: string) => void;
 };
 
+const engine = engineFromParam(new URLSearchParams(window.location.search).get('engine'));
+
 function emptyDiagram() {
-  const processName = t('processName');
-  const startName = t('startEventName');
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns:activiti="http://activiti.org/bpmn"
-             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
-             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
-             id="Definitions_new"
-             targetNamespace="http://activiti.org/test">
-  <process id="Process_1" name="${processName}" isExecutable="true">
-    <startEvent id="StartEvent_1" name="${startName}" />
-  </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
-      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
-        <omgdc:Bounds x="180" y="160" width="36" height="36" />
-      </bpmndi:BPMNShape>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-</definitions>`;
+  return emptyDiagramXml(engine, t('processName'), t('startEventName'));
 }
 
 function setStatus(message: string) {
@@ -67,7 +53,11 @@ function downloadText(filename: string, text: string) {
 }
 
 function applyChrome() {
-  document.title = t('editorTitle');
+  document.title = t('editorTitle', { engine: engine.label });
+  const engineLabel = document.getElementById('engine-name');
+  if (engineLabel) {
+    engineLabel.textContent = engine.label;
+  }
   applyDocumentLocale();
   syncLocaleSwitch();
 
@@ -110,10 +100,10 @@ function createModeler() {
       createTranslateModule(getLocale()),
       BpmnPropertiesPanelModule,
       BpmnPropertiesProviderModule,
-      ActivitiPropertiesProviderModule
+      createEnginePropertiesModule(engine)
     ],
     moddleExtensions: {
-      activiti: activitiModdleDescriptor
+      [engine.prefix]: moddleDescriptorFor(engine)
     }
   });
 }
@@ -216,7 +206,7 @@ async function main() {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    diagramXml = await response.text();
+    diagramXml = adaptActivitiXml(await response.text(), engine);
     diagramLabel = 'sample.bpmn';
     await openDiagram(modeler, diagramXml, diagramLabel);
   } catch (err) {

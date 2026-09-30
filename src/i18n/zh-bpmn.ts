@@ -213,6 +213,8 @@ export const zhBpmn: Record<string, string> = {
   'Expression': '表达式',
   'Async': '异步',
   'Activiti': 'Activiti 扩展',
+  'Flowable': 'Flowable 扩展',
+  'Camunda': 'Camunda 扩展',
   'Comma-separated user ids': '多个用户 ID 用逗号分隔',
   'Comma-separated group ids': '多个用户组 ID 用逗号分隔',
   'activiti:assignee': 'activiti:assignee',

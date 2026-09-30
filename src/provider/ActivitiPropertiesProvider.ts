@@ -1,3 +1,4 @@
+import type { EngineProfile } from '../engines';
 import { getActivitiEntries } from './ActivitiProps';
 
 const LOW_PRIORITY = 500;
@@ -5,28 +6,33 @@ const LOW_PRIORITY = 500;
 type Translate = (text: string) => string;
 
 /**
- * Adds an "Activiti" group to the properties panel for common Activiti extension attributes.
+ * Adds an engine-specific group for the extension attributes that engine reads.
  */
-export default class ActivitiPropertiesProvider {
-  static $inject = ['propertiesPanel', 'translate'];
+export default function createEnginePropertiesProvider(engine: EngineProfile) {
+  return class EnginePropertiesProvider {
+    static $inject = ['propertiesPanel', 'translate'];
 
-  constructor(propertiesPanel: { registerProvider: (priority: number, provider: unknown) => void }, translate: Translate) {
-    propertiesPanel.registerProvider(LOW_PRIORITY, this);
-    this._translate = translate;
-  }
+    constructor(
+      propertiesPanel: { registerProvider: (priority: number, provider: unknown) => void },
+      translate: Translate
+    ) {
+      propertiesPanel.registerProvider(LOW_PRIORITY, this);
+      this._translate = translate;
+    }
 
-  private _translate: Translate;
+    private _translate: Translate;
 
-  getGroups(element: unknown) {
-    return (groups: Array<Record<string, unknown>>) => {
-      groups.push({
-        id: 'activiti',
-        label: this._translate('Activiti'),
-        entries: getActivitiEntries(element as never),
-        shouldOpen: true
-      });
+    getGroups(element: unknown) {
+      return (groups: Array<Record<string, unknown>>) => {
+        groups.push({
+          id: engine.id,
+          label: this._translate(engine.label),
+          entries: getActivitiEntries(element as never, engine),
+          shouldOpen: true
+        });
 
-      return groups;
-    };
-  }
+        return groups;
+      };
+    }
+  };
 }

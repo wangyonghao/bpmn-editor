@@ -21,7 +21,7 @@ function renderSite() {
     }
   });
 
-  const nav = document.querySelector('.site-nav');
+  const nav = document.querySelector('.engine-nav');
   if (nav) {
     nav.setAttribute('aria-label', t('navLabel'));
   }
