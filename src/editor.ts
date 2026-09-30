@@ -5,6 +5,14 @@ import {
 } from 'bpmn-js-properties-panel';
 import activitiModdleDescriptor from 'activiti-bpmn-moddle/resources/activiti.json';
 import { ActivitiPropertiesProviderModule } from './provider';
+import {
+  applyDocumentLocale,
+  bindLocaleSwitch,
+  getLocale,
+  syncLocaleSwitch
+} from './i18n/locale';
+import { t, type MessageKey } from './i18n/messages';
+import { createTranslateModule } from './i18n/translate';
 
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-js.css';
@@ -12,7 +20,14 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 import './style.css';
 
-const EMPTY_DIAGRAM = `<?xml version="1.0" encoding="UTF-8"?>
+type ZoomCanvas = {
+  zoom: (type: string, auto?: string) => void;
+};
+
+function emptyDiagram() {
+  const processName = t('processName');
+  const startName = t('startEventName');
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xmlns:activiti="http://activiti.org/bpmn"
@@ -21,8 +36,8 @@ const EMPTY_DIAGRAM = `<?xml version="1.0" encoding="UTF-8"?>
              xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
              id="Definitions_new"
              targetNamespace="http://activiti.org/test">
-  <process id="Process_1" name="新流程" isExecutable="true">
-    <startEvent id="StartEvent_1" name="开始" />
+  <process id="Process_1" name="${processName}" isExecutable="true">
+    <startEvent id="StartEvent_1" name="${startName}" />
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
@@ -32,6 +47,7 @@ const EMPTY_DIAGRAM = `<?xml version="1.0" encoding="UTF-8"?>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </definitions>`;
+}
 
 function setStatus(message: string) {
   const el = document.getElementById('status');
@@ -50,7 +66,34 @@ function downloadText(filename: string, text: string) {
   URL.revokeObjectURL(url);
 }
 
-async function createModeler() {
+function applyChrome() {
+  document.title = t('editorTitle');
+  applyDocumentLocale();
+  syncLocaleSwitch();
+
+  document.querySelectorAll<HTMLElement>('[data-i18n]').forEach((el) => {
+    const key = el.dataset.i18n as MessageKey | undefined;
+    if (key) {
+      el.textContent = t(key);
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-i18n-title]').forEach((el) => {
+    const key = el.dataset.i18nTitle as MessageKey | undefined;
+    if (key) {
+      el.title = t(key);
+    }
+  });
+
+  document.querySelectorAll<HTMLElement>('[data-i18n-aria]').forEach((el) => {
+    const key = el.dataset.i18nAria as MessageKey | undefined;
+    if (key) {
+      el.setAttribute('aria-label', t(key));
+    }
+  });
+}
+
+function createModeler() {
   const canvas = document.getElementById('canvas');
   const properties = document.getElementById('properties');
 
@@ -58,12 +101,13 @@ async function createModeler() {
     throw new Error('Missing #canvas or #properties container');
   }
 
-  const modeler = new BpmnModeler({
+  return new BpmnModeler({
     container: canvas,
     propertiesPanel: {
       parent: properties
     },
     additionalModules: [
+      createTranslateModule(getLocale()),
       BpmnPropertiesPanelModule,
       BpmnPropertiesProviderModule,
       ActivitiPropertiesProviderModule
@@ -72,28 +116,33 @@ async function createModeler() {
       activiti: activitiModdleDescriptor
     }
   });
-
-  return modeler;
 }
 
 async function openDiagram(modeler: BpmnModeler, xml: string, label: string) {
   try {
     const result = await modeler.importXML(xml);
-    const canvas = modeler.get('canvas');
+    const canvas = modeler.get('canvas') as ZoomCanvas;
     canvas.zoom('fit-viewport', 'auto');
     const warningCount = Array.isArray(result.warnings) ? result.warnings.length : 0;
     setStatus(
-      warningCount > 0 ? `已打开：${label}（${warningCount} 条警告）` : `已打开：${label}`
+      warningCount > 0
+        ? t('openedWarnings', { label, count: warningCount })
+        : t('opened', { label })
     );
   } catch (err) {
     console.error(err);
-    setStatus(`打开失败：${label}`);
-    window.alert(`无法打开流程图：${(err as Error).message || err}`);
+    setStatus(t('openFailed', { label }));
+    window.alert(t('openFailedAlert', { message: (err as Error).message || String(err) }));
   }
 }
 
 async function main() {
-  const modeler = await createModeler();
+  applyChrome();
+  document.documentElement.dataset.ready = 'true';
+
+  let modeler = createModeler();
+  let diagramXml = emptyDiagram();
+  let diagramLabel = 'sample.bpmn';
 
   const btnOpen = document.getElementById('btn-open') as HTMLButtonElement;
   const btnDownload = document.getElementById('btn-download') as HTMLButtonElement;
@@ -110,6 +159,8 @@ async function main() {
       return;
     }
     const xml = await file.text();
+    diagramXml = xml;
+    diagramLabel = file.name;
     await openDiagram(modeler, xml, file.name);
   });
 
@@ -119,27 +170,45 @@ async function main() {
       if (!xml) {
         throw new Error('Empty XML');
       }
+      diagramXml = xml;
       downloadText('diagram.bpmn', xml);
-      setStatus('已下载 diagram.bpmn');
+      setStatus(t('downloaded'));
     } catch (err) {
       console.error(err);
-      setStatus('下载失败');
-      window.alert(`导出失败：${(err as Error).message || err}`);
+      setStatus(t('downloadFailed'));
+      window.alert(t('exportFailed', { message: (err as Error).message || String(err) }));
     }
   });
 
   btnNew.addEventListener('click', async () => {
-    const ok = window.confirm('新建将清空当前画布，是否继续？');
+    const ok = window.confirm(t('confirmNew'));
     if (!ok) {
       return;
     }
-    await openDiagram(modeler, EMPTY_DIAGRAM, '新流程');
+    diagramXml = emptyDiagram();
+    diagramLabel = t('newLabel');
+    await openDiagram(modeler, diagramXml, diagramLabel);
   });
 
   btnFit.addEventListener('click', () => {
-    const canvas = modeler.get('canvas');
+    const canvas = modeler.get('canvas') as ZoomCanvas;
     canvas.zoom('fit-viewport', 'auto');
-    setStatus('已适应画布');
+    setStatus(t('fitted'));
+  });
+
+  bindLocaleSwitch(async () => {
+    try {
+      const saved = await modeler.saveXML({ format: true });
+      if (saved.xml) {
+        diagramXml = saved.xml;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    modeler.destroy();
+    applyChrome();
+    modeler = createModeler();
+    await openDiagram(modeler, diagramXml, diagramLabel);
   });
 
   try {
@@ -147,15 +216,19 @@ async function main() {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    const xml = await response.text();
-    await openDiagram(modeler, xml, 'sample.bpmn');
+    diagramXml = await response.text();
+    diagramLabel = 'sample.bpmn';
+    await openDiagram(modeler, diagramXml, diagramLabel);
   } catch (err) {
     console.warn('Failed to load sample, falling back to empty diagram', err);
-    await openDiagram(modeler, EMPTY_DIAGRAM, '新流程');
+    diagramXml = emptyDiagram();
+    diagramLabel = t('newLabel');
+    await openDiagram(modeler, diagramXml, diagramLabel);
   }
 }
 
 main().catch((err) => {
   console.error(err);
-  setStatus('初始化失败');
+  setStatus(t('initFailed'));
+  document.documentElement.dataset.ready = 'true';
 });

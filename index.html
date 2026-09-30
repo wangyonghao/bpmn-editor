@@ -1,28 +1,79 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Activiti BPMN 在线设计器</title>
+    <title>BPMN Editor</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <script src="/locale-boot.js"></script>
   </head>
   <body>
-    <div id="app">
-      <header class="toolbar">
-        <div class="toolbar-brand">Activiti BPMN 设计器</div>
-        <div class="toolbar-actions">
-          <button type="button" id="btn-open" title="打开本地 BPMN / XML 文件">打开</button>
-          <button type="button" id="btn-download" title="下载当前流程图为 BPMN XML">下载</button>
-          <button type="button" id="btn-new" title="新建空白流程">新建</button>
-          <button type="button" id="btn-fit" title="适应画布">适应画布</button>
-          <input type="file" id="file-input" accept=".bpmn,.xml,application/xml,text/xml" hidden />
+    <header class="site-header">
+      <div class="container site-header-inner">
+        <a class="brand" href="index.html" data-i18n-aria="brandHome">bpmn editor</a>
+        <nav class="site-nav" aria-label="Primary">
+          <a class="nav-camunda" href="editor.html">Camunda</a>
+          <div class="lang-switch" role="group">
+            <button type="button" data-set-locale="en">EN</button>
+            <button type="button" data-set-locale="zh">中文</button>
+          </div>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <section class="hero">
+        <div class="container">
+          <h1 data-i18n="heroTitle"></h1>
+          <p class="lead" data-i18n="heroLead"></p>
         </div>
-        <div class="toolbar-status" id="status">就绪</div>
-      </header>
-      <main class="workspace">
-        <div id="canvas"></div>
-        <aside id="properties"></aside>
-      </main>
-    </div>
-    <script type="module" src="/src/main.ts"></script>
+      </section>
+      <section class="features">
+        <div class="container">
+          <h2 data-i18n="featuresTitle"></h2>
+          <p class="lead" data-i18n="featuresLead"></p>
+          <hr class="rule" />
+          <div class="feature-grid">
+            <article>
+              <svg class="feature-mark" viewBox="0 0 48 48" aria-hidden="true">
+                <rect x="7" y="9" width="26" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="2" />
+                <path d="M16 20h12M16 26h12M16 32h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M30 30l8-8 3 3-8 8-4 1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              </svg>
+              <h3 data-i18n="featureModelTitle"></h3>
+              <p data-i18n="featureModelBody"></p>
+            </article>
+            <article>
+              <svg class="feature-mark" viewBox="0 0 48 48" aria-hidden="true">
+                <path d="M24 8v20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M16 22l8 8 8-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10 36h28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <h3 data-i18n="featureExportTitle"></h3>
+              <p data-i18n="featureExportBody"></p>
+            </article>
+            <article>
+              <svg class="feature-mark" viewBox="0 0 48 48" aria-hidden="true">
+                <circle cx="18" cy="24" r="8" fill="none" stroke="currentColor" stroke-width="2" />
+                <path d="M24 24h16l-4-4M40 24l-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <h3 data-i18n="featureExtTitle"></h3>
+              <p data-i18n="featureExtBody"></p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p data-i18n="footer"></p>
+      </div>
+    </footer>
+    <script type="module" src="/src/site.ts"></script>
   </body>
 </html>
