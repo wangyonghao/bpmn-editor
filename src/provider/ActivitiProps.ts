@@ -9,6 +9,7 @@ import {
 } from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import type { EngineProfile } from '../engines';
 
 type DiagramElement = {
   businessObject: Record<string, unknown> & {
@@ -180,11 +181,12 @@ function createCheckboxEntry(
   };
 }
 
-export function getActivitiEntries(element: DiagramElement) {
+export function getActivitiEntries(element: DiagramElement, engine: EngineProfile) {
   const entries: unknown[] = [];
+  const prefix = engine.prefix;
 
   entries.push({
-    id: 'activiti-documentation',
+    id: `${prefix}-documentation`,
     element,
     component: DocumentationProp,
     isEdited: isTextAreaEntryEdited
@@ -192,44 +194,44 @@ export function getActivitiEntries(element: DiagramElement) {
 
   if (is(element, 'bpmn:UserTask')) {
     entries.push(
-      createTextEntry('activiti-assignee', element, 'Assignee', 'assignee', 'activiti:assignee'),
+      createTextEntry(`${prefix}-assignee`, element, 'Assignee', 'assignee', `${prefix}:assignee`),
       createTextEntry(
-        'activiti-candidateUsers',
+        `${prefix}-candidateUsers`,
         element,
         'Candidate Users',
         'candidateUsers',
         'Comma-separated user ids'
       ),
       createTextEntry(
-        'activiti-candidateGroups',
+        `${prefix}-candidateGroups`,
         element,
         'Candidate Groups',
         'candidateGroups',
         'Comma-separated group ids'
       ),
-      createTextEntry('activiti-formKey', element, 'Form Key', 'formKey', 'activiti:formKey'),
-      createTextEntry('activiti-dueDate', element, 'Due Date', 'dueDate'),
-      createTextEntry('activiti-priority', element, 'Priority', 'priority')
+      createTextEntry(`${prefix}-formKey`, element, 'Form Key', 'formKey', `${prefix}:formKey`),
+      createTextEntry(`${prefix}-dueDate`, element, 'Due Date', 'dueDate'),
+      createTextEntry(`${prefix}-priority`, element, 'Priority', 'priority')
     );
   }
 
   if (is(element, 'bpmn:StartEvent')) {
     entries.push(
-      createTextEntry('activiti-initiator', element, 'Initiator', 'initiator'),
-      createTextEntry('activiti-formKey', element, 'Form Key', 'formKey', 'activiti:formKey')
+      createTextEntry(`${prefix}-initiator`, element, 'Initiator', 'initiator'),
+      createTextEntry(`${prefix}-formKey`, element, 'Form Key', 'formKey', `${prefix}:formKey`)
     );
   }
 
   if (is(element, 'bpmn:ServiceTask')) {
     entries.push(
-      createTextEntry('activiti-class', element, 'Java Class', 'class', 'activiti:class'),
+      createTextEntry(`${prefix}-class`, element, 'Java Class', 'class', `${prefix}:class`),
       createTextEntry(
-        'activiti-delegateExpression',
+        `${prefix}-delegateExpression`,
         element,
         'Delegate Expression',
         'delegateExpression'
       ),
-      createTextEntry('activiti-expression', element, 'Expression', 'expression')
+      createTextEntry(`${prefix}-expression`, element, 'Expression', 'expression')
     );
   }
 
@@ -238,7 +240,9 @@ export function getActivitiEntries(element: DiagramElement) {
     is(element, 'bpmn:Gateway') ||
     is(element, 'bpmn:Event')
   ) {
-    entries.push(createCheckboxEntry('activiti-async', element, 'Async', 'async'));
+    entries.push(
+      createCheckboxEntry(`${prefix}-async`, element, 'Async', engine.asyncProperty)
+    );
   }
 
   return entries;
