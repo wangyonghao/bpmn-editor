@@ -119,7 +119,7 @@ function bindPropertiesToggle(getModeler: () => BpmnModeler) {
   };
 
   const followResize = () => {
-    resizeUntil = performance.now() + 720;
+    resizeUntil = performance.now() + 900;
     if (resizing) {
       return;
     }

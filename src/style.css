@@ -10,8 +10,8 @@
   --toolbar-height: 64px;
   --properties-width: 320px;
   --properties-rail: 40px;
-  --properties-duration: 640ms;
-  --properties-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --properties-duration: 820ms;
+  --properties-ease: cubic-bezier(0.33, 0.08, 0.24, 1);
   --border: #e6e6e6;
 }
 
@@ -157,7 +157,7 @@ body,
   transform-origin: calc(100% - 20px) 32px;
   transition:
     transform var(--properties-duration) var(--properties-ease),
-    opacity 180ms ease 40ms,
+    opacity 200ms ease,
     box-shadow var(--properties-duration) var(--properties-ease);
 }
 
@@ -168,7 +168,7 @@ body,
   box-shadow: none;
   transition:
     transform var(--properties-duration) var(--properties-ease),
-    opacity 260ms ease 300ms,
+    opacity 280ms ease 460ms,
     box-shadow var(--properties-duration) var(--properties-ease);
 }
 
