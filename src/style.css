@@ -9,6 +9,9 @@
   background: #fff;
   --toolbar-height: 64px;
   --properties-width: 320px;
+  --properties-rail: 40px;
+  --properties-duration: 520ms;
+  --properties-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --border: #e6e6e6;
 }
 
@@ -125,17 +128,96 @@ body,
   background-color: #fcfcfc;
 }
 
-#properties {
-  flex: 0 0 var(--properties-width);
+.properties-dock {
+  position: relative;
+  flex: 0 0 auto;
   width: var(--properties-width);
   border-left: 1px solid var(--border);
   background: #fff;
-  overflow: auto;
+  overflow: hidden;
+  transition: width var(--properties-duration) var(--properties-ease);
+}
+
+.properties-dock.is-collapsed {
+  width: var(--properties-rail);
+}
+
+.properties-toggle {
+  position: absolute;
+  top: 18px;
+  right: 6px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bi-gray);
+  cursor: pointer;
+}
+
+.properties-toggle:hover {
+  background: #f2f2f2;
+}
+
+.properties-toggle:focus-visible {
+  outline: 2px solid var(--bi-green);
+  outline-offset: 1px;
+}
+
+.properties-toggle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  transition: transform var(--properties-duration) var(--properties-ease);
+}
+
+.properties-dock.is-collapsed .properties-toggle svg {
+  transform: rotate(180deg);
+}
+
+#properties {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--properties-width);
+  height: 100%;
+  background: #fff;
+  overflow: hidden;
+  transform-origin: calc(100% - 20px) 32px;
+  transition:
+    transform var(--properties-duration) var(--properties-ease),
+    opacity 280ms var(--properties-ease);
+}
+
+.properties-dock.is-collapsed #properties {
+  transform: scale(0.07);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--properties-duration) var(--properties-ease),
+    opacity 420ms cubic-bezier(0.4, 0, 1, 1) 90ms;
+}
+
+.properties-dock .bio-properties-panel-header {
+  padding-right: 42px;
 }
 
 /* Make properties panel fill the aside */
 #properties .bio-properties-panel {
   height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .properties-dock,
+  .properties-toggle svg,
+  #properties {
+    transition: none;
+  }
 }
 
 #canvas .djs-palette {
