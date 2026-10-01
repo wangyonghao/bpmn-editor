@@ -33,7 +33,18 @@
       </header>
       <main class="workspace">
         <div id="canvas"></div>
-        <aside id="properties"></aside>
+        <aside id="properties-dock" class="properties-dock">
+          <button type="button" id="btn-toggle-properties" class="properties-toggle" aria-expanded="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3.2" y="4.2" width="17.6" height="15.6" rx="2" fill="none" stroke="currentColor" stroke-width="1.6" />
+              <path d="M15 4.2v15.6" fill="none" stroke="currentColor" stroke-width="1.6" />
+              <path d="M8.2 9.3 11.3 12 8.2 14.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div class="properties-sheet">
+            <div id="properties"></div>
+          </div>
+        </aside>
       </main>
     </div>
     <script type="module" src="/src/editor.ts"></script>

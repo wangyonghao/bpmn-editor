@@ -27,6 +27,7 @@ import './style.css';
 
 type ZoomCanvas = {
   zoom: (type: string, auto?: string) => void;
+  resized: () => void;
 };
 
 const engine = engineFromParam(new URLSearchParams(window.location.search).get('engine'));
@@ -81,6 +82,72 @@ function applyChrome() {
       el.setAttribute('aria-label', t(key));
     }
   });
+
+  syncPropertiesToggle();
+}
+
+function syncPropertiesToggle() {
+  const dock = document.getElementById('properties-dock');
+  const button = document.getElementById('btn-toggle-properties');
+  if (!dock || !button) {
+    return;
+  }
+  const expanded = !dock.classList.contains('is-collapsed');
+  button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  const label = t(expanded ? 'collapseProperties' : 'expandProperties');
+  button.title = label;
+  button.setAttribute('aria-label', label);
+}
+
+function bindPropertiesToggle(getModeler: () => BpmnModeler) {
+  const dock = document.getElementById('properties-dock');
+  const button = document.getElementById('btn-toggle-properties');
+  if (!dock || !button) {
+    return;
+  }
+
+  let resizeUntil = 0;
+  let resizing = false;
+
+  const resizeCanvas = () => {
+    try {
+      const canvas = getModeler().get('canvas') as ZoomCanvas;
+      canvas.resized();
+    } catch {
+      // The modeler is recreated during a language switch.
+    }
+  };
+
+  const followResize = () => {
+    resizeUntil = performance.now() + 900;
+    if (resizing) {
+      return;
+    }
+    resizing = true;
+    const tick = () => {
+      resizeCanvas();
+      if (performance.now() < resizeUntil) {
+        requestAnimationFrame(tick);
+      } else {
+        resizing = false;
+      }
+    };
+    requestAnimationFrame(tick);
+  };
+
+  button.addEventListener('click', () => {
+    dock.classList.toggle('is-collapsed');
+    syncPropertiesToggle();
+    followResize();
+  });
+
+  dock.addEventListener('transitionend', (event) => {
+    if (event.target === dock && event.propertyName === 'width') {
+      resizeCanvas();
+    }
+  });
+
+  syncPropertiesToggle();
 }
 
 function createModeler() {
@@ -185,6 +252,8 @@ async function main() {
     canvas.zoom('fit-viewport', 'auto');
     setStatus(t('fitted'));
   });
+
+  bindPropertiesToggle(() => modeler);
 
   bindLocaleSwitch(async () => {
     try {
