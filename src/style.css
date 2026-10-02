@@ -31,6 +31,14 @@ body,
   overflow: hidden;
 }
 
+@supports (height: 100dvh) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+  }
+}
+
 #app {
   display: flex;
   flex-direction: column;
@@ -40,9 +48,12 @@ body,
   flex: 0 0 auto;
   min-height: var(--toolbar-height);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
-  padding: 0 16px;
+  gap: 10px 16px;
+  padding: 8px 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   background: var(--bi-green);
   color: #fff;
 }
@@ -126,6 +137,12 @@ body,
     linear-gradient(rgba(64, 64, 64, 0.06) 1px, transparent 1px);
   background-size: 20px 20px;
   background-color: #fcfcfc;
+  touch-action: none;
+}
+
+#canvas .djs-container,
+#canvas .djs-container svg {
+  touch-action: none;
 }
 
 .properties-dock {
@@ -134,7 +151,7 @@ body,
   right: 12px;
   bottom: 12px;
   z-index: 5;
-  width: var(--properties-width);
+  width: min(var(--properties-width), calc(100% - 16px));
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -262,17 +279,47 @@ body,
 
 @media (max-width: 900px) {
   :root {
-    --properties-width: 240px;
-  }
-
-  .toolbar {
-    flex-wrap: wrap;
-    row-gap: 8px;
-    padding-top: 8px;
-    padding-bottom: 8px;
+    --properties-width: 280px;
   }
 
   .toolbar-status {
     display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    gap: 8px;
+    padding: 8px 10px;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+  }
+
+  .toolbar-brand {
+    font-size: 16px;
+  }
+
+  .toolbar-actions {
+    flex: 1 1 100%;
+  }
+
+  .toolbar-actions button {
+    padding: 8px 10px;
+  }
+
+  .lang-switch {
+    margin-left: auto;
+  }
+
+  .properties-dock {
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: min(260px, calc(100% - 116px));
+  }
+
+  #canvas .djs-palette {
+    left: 8px;
+    top: 8px;
   }
 }
