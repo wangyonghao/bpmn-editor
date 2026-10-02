@@ -110,6 +110,7 @@ body,
 }
 
 .workspace {
+  position: relative;
   display: flex;
   flex: 1 1 auto;
   min-height: 0;
@@ -128,32 +129,31 @@ body,
 }
 
 .properties-dock {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 5;
   width: var(--properties-width);
-  min-width: 0;
-  background: transparent;
-  overflow: visible;
-  transition: width var(--properties-duration) var(--properties-ease);
-}
-
-.properties-dock.is-collapsed {
-  width: 0;
-  background: transparent;
-  border: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  pointer-events: none;
 }
 
 .properties-sheet {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: var(--properties-width);
-  height: 100%;
+  position: relative;
+  flex: 0 1 auto;
+  width: 100%;
+  height: max-content;
+  max-height: 100%;
+  min-height: 0;
+  pointer-events: auto;
   background: #fff;
-  border-left: 1px solid var(--border);
-  box-shadow: -12px 0 28px rgba(64, 64, 64, 0.06);
-  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(64, 64, 64, 0.16);
+  overflow: auto;
   transform-origin: calc(100% - 20px) 32px;
   transition:
     transform var(--properties-duration) var(--properties-ease),
@@ -177,6 +177,7 @@ body,
   top: 18px;
   right: 6px;
   z-index: 30;
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -222,18 +223,28 @@ body,
 
 #properties {
   width: 100%;
-  height: 100%;
+  height: auto;
   background: #fff;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .properties-dock .bio-properties-panel-header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   padding-right: 42px;
 }
 
-/* Make properties panel fill the aside */
 #properties .bio-properties-panel {
-  height: 100%;
+  height: auto;
+  flex: none;
+  overflow: visible;
+}
+
+.properties-dock .bio-properties-panel-scroll-container {
+  flex: none;
+  height: auto;
+  overflow: visible;
 }
 
 @media (prefers-reduced-motion: reduce) {

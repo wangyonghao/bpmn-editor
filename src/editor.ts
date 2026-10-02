@@ -99,52 +99,16 @@ function syncPropertiesToggle() {
   button.setAttribute('aria-label', label);
 }
 
-function bindPropertiesToggle(getModeler: () => BpmnModeler) {
+function bindPropertiesToggle() {
   const dock = document.getElementById('properties-dock');
   const button = document.getElementById('btn-toggle-properties');
   if (!dock || !button) {
     return;
   }
 
-  let resizeUntil = 0;
-  let resizing = false;
-
-  const resizeCanvas = () => {
-    try {
-      const canvas = getModeler().get('canvas') as ZoomCanvas;
-      canvas.resized();
-    } catch {
-      // The modeler is recreated during a language switch.
-    }
-  };
-
-  const followResize = () => {
-    resizeUntil = performance.now() + 900;
-    if (resizing) {
-      return;
-    }
-    resizing = true;
-    const tick = () => {
-      resizeCanvas();
-      if (performance.now() < resizeUntil) {
-        requestAnimationFrame(tick);
-      } else {
-        resizing = false;
-      }
-    };
-    requestAnimationFrame(tick);
-  };
-
   button.addEventListener('click', () => {
     dock.classList.toggle('is-collapsed');
     syncPropertiesToggle();
-    followResize();
-  });
-
-  dock.addEventListener('transitionend', (event) => {
-    if (event.target === dock && event.propertyName === 'width') {
-      resizeCanvas();
-    }
   });
 
   syncPropertiesToggle();
@@ -253,7 +217,7 @@ async function main() {
     setStatus(t('fitted'));
   });
 
-  bindPropertiesToggle(() => modeler);
+  bindPropertiesToggle();
 
   bindLocaleSwitch(async () => {
     try {
