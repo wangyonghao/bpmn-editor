@@ -25,10 +25,11 @@ import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 import './style.css';
 
-type ZoomCanvas = {
-  zoom: (type: string, auto?: string) => void;
-  resized: () => void;
+type DiagramCanvas = {
+  zoom: (scale?: number | 'fit-viewport', center?: { x: number; y: number } | string) => number;
 };
+
+const PINCH_SCALE = { min: 0.2, max: 4 };
 
 const engine = engineFromParam(new URLSearchParams(window.location.search).get('engine'));
 
@@ -99,6 +100,77 @@ function syncPropertiesToggle() {
   button.setAttribute('aria-label', label);
 }
 
+function touchDistance(first: Touch, second: Touch) {
+  return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+}
+
+function bindPinchZoom(getModeler: () => BpmnModeler) {
+  const canvasEl = document.getElementById('canvas');
+  if (!canvasEl) {
+    return;
+  }
+
+  let startDistance = 0;
+  let startScale = 1;
+
+  const readScale = () => {
+    const canvas = getModeler().get('canvas') as DiagramCanvas;
+    return canvas.zoom();
+  };
+
+  canvasEl.addEventListener(
+    'touchstart',
+    (event) => {
+      if (event.touches.length !== 2) {
+        return;
+      }
+      event.preventDefault();
+      startDistance = touchDistance(event.touches[0], event.touches[1]);
+      try {
+        startScale = readScale();
+      } catch {
+        startDistance = 0;
+      }
+    },
+    { passive: false }
+  );
+
+  canvasEl.addEventListener(
+    'touchmove',
+    (event) => {
+      if (event.touches.length !== 2 || startDistance <= 0) {
+        return;
+      }
+      event.preventDefault();
+      const nextDistance = touchDistance(event.touches[0], event.touches[1]);
+      const rect = canvasEl.getBoundingClientRect();
+      const scale = Math.min(
+        PINCH_SCALE.max,
+        Math.max(PINCH_SCALE.min, startScale * (nextDistance / startDistance))
+      );
+      const center = {
+        x: (event.touches[0].clientX + event.touches[1].clientX) / 2 - rect.left,
+        y: (event.touches[0].clientY + event.touches[1].clientY) / 2 - rect.top
+      };
+      try {
+        const canvas = getModeler().get('canvas') as DiagramCanvas;
+        canvas.zoom(scale, center);
+      } catch {
+        startDistance = 0;
+      }
+    },
+    { passive: false }
+  );
+
+  const endPinch = (event: TouchEvent) => {
+    if (event.touches.length < 2) {
+      startDistance = 0;
+    }
+  };
+  canvasEl.addEventListener('touchend', endPinch);
+  canvasEl.addEventListener('touchcancel', endPinch);
+}
+
 function bindPropertiesToggle() {
   const dock = document.getElementById('properties-dock');
   const button = document.getElementById('btn-toggle-properties');
@@ -142,7 +214,7 @@ function createModeler() {
 async function openDiagram(modeler: BpmnModeler, xml: string, label: string) {
   try {
     const result = await modeler.importXML(xml);
-    const canvas = modeler.get('canvas') as ZoomCanvas;
+    const canvas = modeler.get('canvas') as DiagramCanvas;
     canvas.zoom('fit-viewport', 'auto');
     const warningCount = Array.isArray(result.warnings) ? result.warnings.length : 0;
     setStatus(
@@ -212,12 +284,13 @@ async function main() {
   });
 
   btnFit.addEventListener('click', () => {
-    const canvas = modeler.get('canvas') as ZoomCanvas;
+    const canvas = modeler.get('canvas') as DiagramCanvas;
     canvas.zoom('fit-viewport', 'auto');
     setStatus(t('fitted'));
   });
 
   bindPropertiesToggle();
+  bindPinchZoom(() => modeler);
 
   bindLocaleSwitch(async () => {
     try {
