@@ -9,7 +9,6 @@
   background: #fff;
   --toolbar-height: 64px;
   --properties-width: 320px;
-  --properties-rail: 40px;
   --properties-duration: 820ms;
   --properties-ease: cubic-bezier(0.33, 0.08, 0.24, 1);
   --border: #e6e6e6;
@@ -133,15 +132,16 @@ body,
   z-index: 2;
   flex: 0 0 auto;
   width: var(--properties-width);
+  min-width: 0;
   background: transparent;
   overflow: visible;
   transition: width var(--properties-duration) var(--properties-ease);
 }
 
 .properties-dock.is-collapsed {
-  width: var(--properties-rail);
-  background: #fff;
-  border-left: 1px solid var(--border);
+  width: 0;
+  background: transparent;
+  border: 0;
 }
 
 .properties-sheet {
@@ -204,6 +204,16 @@ body,
   height: 18px;
   display: block;
   transition: transform var(--properties-duration) var(--properties-ease);
+}
+
+.properties-dock.is-collapsed .properties-toggle {
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(64, 64, 64, 0.16);
+}
+
+.properties-dock.is-collapsed .properties-toggle:hover {
+  background: #f4f4f4;
 }
 
 .properties-dock.is-collapsed .properties-toggle svg {
